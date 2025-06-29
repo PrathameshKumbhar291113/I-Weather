@@ -2,7 +2,7 @@ package com.prathameshkumbhar.iweather.android.ui
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.graphics.Paint
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -64,6 +64,7 @@ fun WeatherForecastScreen(
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val locationPermission = rememberPermissionState(permission = ACCESS_FINE_LOCATION)
+    val networkAvailable by viewModel.isNetworkAvailable.collectAsState()
 
 
     LaunchedEffect(Unit) {
@@ -79,7 +80,7 @@ fun WeatherForecastScreen(
                     )
                 },
                 onFailure = {
-
+                    Toast.makeText(context, "Failed To Fetch Location.", Toast.LENGTH_SHORT).show()
                 }
             )
         }
@@ -89,7 +90,15 @@ fun WeatherForecastScreen(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Log.e("WEATHER", "WeatherForecastScreen: $state")
+        if (!networkAvailable) {
+            Text(
+                text = "No Internet Connection, Last Fetch Data Is Showed.",
+                color = Color.Red,
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+
         when (val result = state) {
             is NetworkResult.Loading -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -99,19 +108,24 @@ fun WeatherForecastScreen(
 
             is NetworkResult.Success -> {
                 result.data?.currentWeather?.let { weather ->
-                    Log.e("WEATHER", "WeatherForecastScreen: ${weather.toString()}")
                     WeatherContent(
                         weather = weather,
                         isDay = weather.isDay == 1,
-                        result.data?.timezone.toString()
+                        result.data?.timezone.toString(),
+                        networkAvailable
                     )
+
                 }
             }
 
             is NetworkResult.Error -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Error: ${result.message}")
-                    Log.e("WEATHER", "WeatherForecastScreen: ${result.message} ")
+                    Text(
+                        text = "Something went wrong, kindly try again later.",
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
             }
         }
@@ -122,7 +136,8 @@ fun WeatherForecastScreen(
 fun WeatherContent(
     weather: GetWeatherForecastResponse.CurrentWeather,
     isDay: Boolean,
-    timeZone: String
+    timeZone: String,
+    networkAvailable: Boolean
 ) {
     val backgroundColor = if (isDay) Color(0xFFBBDEFB) else Color(0xFF121212)
     val textColor = if (isDay) Color.Black else Color.White
@@ -145,7 +160,7 @@ fun WeatherContent(
         Spacer(Modifier.height(16.dp))
 
         Text(
-            text = "Current Weather",
+            text = if (!networkAvailable) "Last Fetched Weather" else "Current Weather",
             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
             color = textColor
         )

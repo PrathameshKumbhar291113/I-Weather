@@ -1,0 +1,47 @@
+CREATE TABLE WeatherForecastEntity (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    -- Current Weather fields
+    interval INTEGER,
+    is_day INTEGER,
+    temperature REAL,
+    time TEXT,
+    weathercode INTEGER,
+    winddirection INTEGER,
+    windspeed REAL,
+
+    -- Units
+    interval_unit TEXT,
+    is_day_unit TEXT,
+    temperature_unit TEXT,
+    time_unit TEXT,
+    weathercode_unit TEXT,
+    winddirection_unit TEXT,
+    windspeed_unit TEXT,
+
+    -- Top-level metadata
+    elevation REAL,
+    generationtime_ms REAL,
+    latitude REAL,
+    longitude REAL,
+    timezone TEXT,
+    timezone_abbreviation TEXT,
+    utc_offset_seconds INTEGER
+);
+
+selectLatest:
+SELECT * FROM WeatherForecastEntity
+ORDER BY id DESC
+LIMIT 1;
+
+insertWeatherForecast:
+INSERT INTO WeatherForecastEntity(
+    interval, is_day, temperature, time, weathercode, winddirection, windspeed,
+    interval_unit, is_day_unit, temperature_unit, time_unit, weathercode_unit, winddirection_unit, windspeed_unit,
+    elevation, generationtime_ms, latitude, longitude, timezone, timezone_abbreviation, utc_offset_seconds
+)
+VALUES (
+    ?, ?, ?, ?, ?, ?, ?,
+    ?, ?, ?, ?, ?, ?, ?,
+    ?, ?, ?, ?, ?, ?, ?
+);

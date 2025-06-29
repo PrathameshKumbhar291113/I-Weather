@@ -9,7 +9,7 @@ plugins {
 sqldelight {
     databases {
         create("IWeatherDB") {
-            packageName.set("com.prathameshkumbhar.iweather.shared.database")
+            packageName.set("com.prathameshkumbhar.iweather.database.entity")
         }
     }
 }
